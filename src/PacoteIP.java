@@ -15,7 +15,16 @@ public class PacoteIP {
     private short versao, comprimentoDoCabecalho, comprimentoPacote, identificacao, falgMaisFragmentos, flagNaoFragmentar, deslocamentoDoFragmento, TLL = 5,checkSum, opcoes; 
     private String tipoServico, protocolo;
     private InetAddress ipDestino, ipOrigem;
+    private Object dados;
 
+    public Object getDados() {
+        return dados;
+    }
+
+    public void setDados(Object dados) {
+        this.dados = dados;
+    }
+    
     public short getVersao() {
         return versao;
     }
