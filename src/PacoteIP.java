@@ -1,4 +1,5 @@
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
 /*
@@ -11,7 +12,7 @@ import java.net.InetAddress;
  *
  * @author mrgab
  */
-public class PacoteIP {
+public class PacoteIP implements Serializable{
     private short versao, comprimentoDoCabecalho, comprimentoPacote, identificacao, falgMaisFragmentos, flagNaoFragmentar, deslocamentoDoFragmento, TLL = 5,checkSum, opcoes; 
     private String tipoServico, protocolo;
     private InetAddress ipDestino, ipOrigem;

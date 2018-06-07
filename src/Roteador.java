@@ -1,6 +1,8 @@
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -58,7 +60,7 @@ public class Roteador {
         for (int j = 0; j < mascara.length; j++) {
             Integer inteiro = new Integer((mascara[j]));
 //            System.out.println(inteiro);
-            if(Integer.toBinaryString(inteiro).equals("0")){
+            if (Integer.toBinaryString(inteiro).equals("0")) {
 //                System.out.println("Entroooooooooou");
                 novaMascara = novaMascara + "00000000";
                 continue;
@@ -75,9 +77,9 @@ public class Roteador {
             for (int i = 0; i < args.length - 1; i++) {
                 String[] separar = args[i + 1].split("\\/");
                 tabelaRoteamento[i][0] = InetAddress.getByName(separar[0]);
-                if(ehNumeroPonto(separar[1])){
+                if (ehNumeroPonto(separar[1])) {
                     tabelaRoteamento[i][1] = converteMascaraParaBinario(separar[1]);
-                }else{
+                } else {
                     tabelaRoteamento[i][1] = converteMascaraParaBinarioCIDR(separar[1]);
                 }
                 tabelaRoteamento[i][2] = InetAddress.getByName(separar[2]);
@@ -94,15 +96,36 @@ public class Roteador {
     }
 
     private static String converteMascaraParaBinarioCIDR(String string) {
-        if(string.length() == 3){
+        if (string.length() == 3) {
             string = string.substring(1, 2);
         }
         String binario = "";
         int numero = Integer.parseInt(string);
-        for(int i = 0; i < 32; i++){
-            if(numero-- > 0) binario = binario + "1";
-            else binario = binario + "0";
+        for (int i = 0; i < 32; i++) {
+            if (numero-- > 0) {
+                binario = binario + "1";
+            } else {
+                binario = binario + "0";
+            }
         }
         return binario;
+    }// fim converteMascaraParaBinarioCIDR
+
+    public static void encaminha(InetAddress proxSalto, String interfaceDeSaida, PacoteIP pacote) {//testado e funcionando
+        try {
+            int porta = Integer.parseInt(interfaceDeSaida);
+            System.out.println("Endereco de destino:" + pacote.getIpDestino() + " , proximo salto: " + proxSalto + " pela interface: " + interfaceDeSaida);
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            ObjectOutputStream o = new ObjectOutputStream(b);
+            o.flush();
+            o.writeObject(pacote);
+            DatagramPacket pacoteUDP = new DatagramPacket(b.toByteArray(), b.toByteArray().length, proxSalto, porta);
+            DatagramSocket socket = new DatagramSocket();
+            socket.send(pacoteUDP);
+            socket.close();
+            pacoteUDP = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }// fim class
