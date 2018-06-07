@@ -75,7 +75,11 @@ public class Roteador {
             for (int i = 0; i < args.length - 1; i++) {
                 String[] separar = args[i + 1].split("\\/");
                 tabelaRoteamento[i][0] = InetAddress.getByName(separar[0]);
-                tabelaRoteamento[i][1] = converteMascaraParaBinario(separar[1]);
+                if(ehNumeroPonto(separar[1])){
+                    tabelaRoteamento[i][1] = converteMascaraParaBinario(separar[1]);
+                }else{
+                    tabelaRoteamento[i][1] = converteMascaraParaBinarioCIDR(separar[1]);
+                }
                 tabelaRoteamento[i][2] = InetAddress.getByName(separar[2]);
                 tabelaRoteamento[i][3] = separar[3];
             }
@@ -83,5 +87,22 @@ public class Roteador {
             e.printStackTrace();
         }
         return tabelaRoteamento;
+    }
+
+    private static boolean ehNumeroPonto(String string) {
+        return string.contains(".");
+    }
+
+    private static String converteMascaraParaBinarioCIDR(String string) {
+        if(string.length() == 3){
+            string = string.substring(1, 2);
+        }
+        String binario = "";
+        int numero = Integer.parseInt(string);
+        for(int i = 0; i < 32; i++){
+            if(numero-- > 0) binario = binario + "1";
+            else binario = binario + "0";
+        }
+        return binario;
     }
 }// fim class
