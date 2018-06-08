@@ -26,16 +26,12 @@ public class Testadora {
 //        }
 //        System.out.println();
 //    }
-        byte[] buffer = new byte[2048];
-        DatagramPacket pacoteUDP = new DatagramPacket(buffer, buffer.length);
-        DatagramSocket socket = new DatagramSocket(12333);
+//        
         PacoteIP pacote = new PacoteIP();
-        pacote.setIpDestino(InetAddress.getLoopbackAddress());
-        Roteador.encaminha(pacote.getIpDestino(), "12333", pacote);
-        socket.receive(pacoteUDP);
-        System.out.println("Pacote chegou");
-        socket.close();
-
+        pacote.setIpDestino(InetAddress.getLocalHost());
+        pacote.setIpOrigem(InetAddress.getLocalHost());
+        pacote.setDados("Palmeiras ganhou do Gremio em Porto Alegre por 2 a 0");
+        Roteador.roteamentoDireto(pacote);
     }
 
 }

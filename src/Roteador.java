@@ -128,4 +128,10 @@ public class Roteador {
             e.printStackTrace();
         }
     }
+    public static void roteamentoDireto(PacoteIP pacote){ // testada e funcionando
+        System.out.println("O pacote chegou ao destino");
+        System.out.println("A mensagem eh: " + pacote.getDados());
+        System.out.println("IP destino: " + pacote.getIpDestino());
+        System.out.println("IP origem: " + pacote.getIpOrigem());
+    }
 }// fim class
