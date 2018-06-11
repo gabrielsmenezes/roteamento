@@ -21,7 +21,7 @@ public class Roteador {
     public static void main(String[] args) {
         try {
             int porta = Integer.parseInt(args[0]);
-            Object[] tabelaRoteamento = criaTabelaRoteamento(args);
+            Object[][] tabelaRoteamento = criaTabelaRoteamento(args);
             byte[] buffer = new byte[2048];
             DatagramPacket pacote = new DatagramPacket(buffer, buffer.length);
             DatagramSocket socket = new DatagramSocket(porta);
@@ -52,24 +52,6 @@ public class Roteador {
         return pacoteIP.getTLL() > 0;
     }
 
-    public static String converteMascaraParaBinario(String separar) {
-//        System.out.println(separar);
-        String[] mascara = separar.split("\\.");
-//        for(String i : mascara) System.out.println(i);
-        String novaMascara = "";
-        for (int j = 0; j < mascara.length; j++) {
-            Integer inteiro = new Integer((mascara[j]));
-//            System.out.println(inteiro);
-            if (Integer.toBinaryString(inteiro).equals("0")) {
-//                System.out.println("Entroooooooooou");
-                novaMascara = novaMascara + "00000000";
-                continue;
-            }
-            novaMascara = novaMascara + Integer.toBinaryString(inteiro);
-        }
-        return novaMascara;
-    }// testada e funcionando
-
     public static Object[][] criaTabelaRoteamento(String[] args) {//testada e funcionando
         Object[][] tabelaRoteamento = null;
         try {
@@ -78,7 +60,7 @@ public class Roteador {
                 String[] separar = args[i + 1].split("\\/");
                 tabelaRoteamento[i][0] = InetAddress.getByName(separar[0]);
                 if (ehNumeroPonto(separar[1])) {
-                    tabelaRoteamento[i][1] = converteMascaraParaBinario(separar[1]);
+                    tabelaRoteamento[i][1] = converteIpParaBinario(separar[1]);
                 } else {
                     tabelaRoteamento[i][1] = converteMascaraParaBinarioCIDR(separar[1]);
                 }
@@ -95,12 +77,13 @@ public class Roteador {
         return string.contains(".");
     }
 
-    private static String converteMascaraParaBinarioCIDR(String string) {
+    private static String converteMascaraParaBinarioCIDR(String string) throws Exception {
         if (string.length() == 3) {
             string = string.substring(1, 2);
         }
         String binario = "";
         int numero = Integer.parseInt(string);
+        if(numero > 32 || numero < 0) throw new Exception("O valor da mascara deve ser entre 0 e 32");
         for (int i = 0; i < 32; i++) {
             if (numero-- > 0) {
                 binario = binario + "1";
@@ -134,4 +117,52 @@ public class Roteador {
         System.out.println("IP destino: " + pacote.getIpDestino());
         System.out.println("IP origem: " + pacote.getIpOrigem());
     }
+    public static int descobreProximoRoteador(Object[][] tabelaRoteamento, PacoteIP pacote){
+        String ipDestinoBinario = converteIpParaBinario( pacote.getIpDestino().getHostAddress() );
+        String redeDestino;
+        String redeTabela;
+        int[] maiorMascara = new int[2];
+        maiorMascara[0] = 0; // armazena o indice da maior mascara que deu match
+        maiorMascara[1] = -1; // armazena o tamanho da mascara
+        for(int i = 0; i < tabelaRoteamento.length;i++){
+            redeDestino = extraiRede(ipDestinoBinario, (String) tabelaRoteamento[i][1]);
+            InetAddress endereco = (InetAddress) tabelaRoteamento[i][0];
+            redeTabela = endereco.getHostAddress();
+            redeTabela = converteIpParaBinario(redeTabela);
+            redeTabela = extraiRede(redeTabela, (String) tabelaRoteamento[i][1]);
+            if(redeDestino.equals(redeTabela) && maiorMascara[1] < extraiRede((String) tabelaRoteamento[i][1], (String) tabelaRoteamento[i][1]).length()){
+                maiorMascara[0] = i;
+                maiorMascara[1] = extraiRede((String) tabelaRoteamento[i][1], (String) tabelaRoteamento[i][1]).length();
+            } 
+        }
+        
+        if (maiorMascara[1] == -1) // entao tem que ir pela rota default
+            return tabelaRoteamento.length - 1;
+        return maiorMascara[1];
+    }
+    public static String extraiRede(String ip, String mascara){ /// testada e funcionando
+        String saida = "";
+        for(int i = 0; mascara.charAt(i) != '0' && i < 32 ;i++){
+            saida = saida + ip.charAt(i);
+        }
+        return saida;
+    }
+    
+    
+    
+    public static String converteIpParaBinario(String iP) {// testada e funcionando
+        String[] ip = iP.split("\\.");
+        String novaIp = "";
+        for (int j = 0; j < ip.length; j++) {
+            Integer inteiro = new Integer((ip[j]));
+            String meio = Integer.toBinaryString(inteiro);
+            while(meio.length() != 8)
+                meio = "0" + meio;
+            
+            novaIp = novaIp + meio;
+        }
+        return novaIp;
+    }// testada e funcionando
+    
+    
 }// fim class

@@ -27,11 +27,13 @@ public class Testadora {
 //        System.out.println();
 //    }
 //        
-        PacoteIP pacote = new PacoteIP();
-        pacote.setIpDestino(InetAddress.getLocalHost());
-        pacote.setIpOrigem(InetAddress.getLocalHost());
-        pacote.setDados("Palmeiras ganhou do Gremio em Porto Alegre por 2 a 0");
-        Roteador.roteamentoDireto(pacote);
+//        PacoteIP pacote = new PacoteIP();
+//        pacote.setIpDestino(InetAddress.getLocalHost());
+//        pacote.setIpOrigem(InetAddress.getLocalHost());
+//        pacote.setDados("Palmeiras ganhou do Gremio em Porto Alegre por 2 a 0");
+//        Roteador.roteamentoDireto(pacote);
+System.out.println(    Roteador.converteIpParaBinario("255.255.255.0") );
+//    System.out.println( Roteador.extraiRede("10000000111111110000000100000001", Roteador.converteMascaraParaBinario("255.255.255.0")));
     }
 
 }
