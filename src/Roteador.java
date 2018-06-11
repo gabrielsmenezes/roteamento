@@ -135,10 +135,10 @@ public class Roteador {
                 maiorMascara[1] = extraiRede((String) tabelaRoteamento[i][1], (String) tabelaRoteamento[i][1]).length();
             } 
         }
-        
-        if (maiorMascara[1] == -1) // entao tem que ir pela rota default
-            return tabelaRoteamento.length - 1;
-        return maiorMascara[1];
+        if (maiorMascara[1] == -1){ // entao tem que ir pela rota default
+            return tabelaRoteamento.length - 1;            
+        }
+        return maiorMascara[0];
     }
     public static String extraiRede(String ip, String mascara){ /// testada e funcionando
         String saida = "";

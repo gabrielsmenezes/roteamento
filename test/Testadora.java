@@ -27,13 +27,24 @@ public class Testadora {
 //        System.out.println();
 //    }
 //        
-//        PacoteIP pacote = new PacoteIP();
-//        pacote.setIpDestino(InetAddress.getLocalHost());
-//        pacote.setIpOrigem(InetAddress.getLocalHost());
-//        pacote.setDados("Palmeiras ganhou do Gremio em Porto Alegre por 2 a 0");
+        args = new String[5];
+        args[0] = "000";
+        args[1] = "192.168.1.0/255.255.255.0/0.0.0.0/2554";
+        args[2] = "192.168.2.0/255.255.255.0/0.0.0.0/2553";
+        args[3] = "192.168.3.0/255.255.255.0/255.255.255.1/2552";
+        args[4] = "0.0.0.0/255.255.255.0/255.255.255.1/2553";
+        
+        PacoteIP pacote = new PacoteIP();
+        pacote.setIpDestino(InetAddress.getByName("192.168.1.1"));
+        pacote.setIpOrigem(InetAddress.getLocalHost());
+        pacote.setDados("Palmeiras ganhou do Gremio em Porto Alegre por 2 a 0");
 //        Roteador.roteamentoDireto(pacote);
-System.out.println(    Roteador.converteIpParaBinario("255.255.255.0") );
+//System.out.println(    Roteador.converteIpParaBinario("255.255.255.0") );
 //    System.out.println( Roteador.extraiRede("10000000111111110000000100000001", Roteador.converteMascaraParaBinario("255.255.255.0")));
+
+    Object[][] tabela = Roteador.criaTabelaRoteamento(args);
+    System.out.println ( (String)  tabela[Roteador.descobreProximoRoteador(tabela, pacote)][3] );
+
     }
 
 }
