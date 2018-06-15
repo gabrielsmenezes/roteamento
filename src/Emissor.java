@@ -24,7 +24,9 @@ public class Emissor {
             InetAddress ipDestino = InetAddress.getByName(args[3]);
             String dados = args[4];
             PacoteIP pacote = criaPacote(ipDestino, ipOrigem, dados);
-
+            System.out.println("Pacote criado");
+            enviaPacote(pacote, ipDefault, portaDefault);
+            System.out.println("Pacote enviador");
         } catch (Exception e) {
             e.printStackTrace();
         }

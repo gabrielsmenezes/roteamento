@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,22 +18,37 @@ import java.net.InetAddress;
  * @author mrgab
  */
 public class Roteador {
-
     public static void main(String[] args) {
-        try {
-            int porta = Integer.parseInt(args[0]);
+        try {   
+            int porta = Integer.parseInt(args[0]); // roteador recebe a porta em que escutará 
             Object[][] tabelaRoteamento = criaTabelaRoteamento(args);
+            System.out.println("Tabela criada");
             byte[] buffer = new byte[2048];
             DatagramPacket pacote = new DatagramPacket(buffer, buffer.length);
             DatagramSocket socket = new DatagramSocket(porta);
             while (true) {
-                socket.receive(pacote);
+                socket.receive(pacote);// recebe pacote
+                System.out.println("Pacote recebido");
                 ByteArrayInputStream b = new ByteArrayInputStream(buffer);
                 ObjectInputStream o = new ObjectInputStream(b);
                 PacoteIP pacoteIP = (PacoteIP) o.readObject();
                 decrementaTLL(pacoteIP);
-                if (verificaTLL(pacoteIP)) {
-
+                System.out.println("TLL decrementado");
+                if (verificaTLL(pacoteIP)) {// se o TLL for maior que 0 entao nao descarta
+                    if(avaliaEnderecoDestino(pacoteIP)){
+                        System.out.println("Roteamento direto");
+                        roteamentoDireto(pacoteIP);
+                    }
+                    else {
+                        System.out.println("Encaminhamento");
+                        int indiceProx = descobreProximoRoteador(tabelaRoteamento, pacoteIP);
+                        InetAddress proxSalto = (InetAddress) tabelaRoteamento[indiceProx][2];
+                        String interfaceDeSaida = (String) tabelaRoteamento[indiceProx][3];
+                        encaminha(proxSalto, interfaceDeSaida, pacoteIP);
+                    }
+                    
+                    
+                    
                 }// fim ife
                 else {
                     continue;
@@ -117,7 +133,8 @@ public class Roteador {
         System.out.println("IP destino: " + pacote.getIpDestino());
         System.out.println("IP origem: " + pacote.getIpOrigem());
     }
-    public static int descobreProximoRoteador(Object[][] tabelaRoteamento, PacoteIP pacote){
+    
+    public static int descobreProximoRoteador(Object[][] tabelaRoteamento, PacoteIP pacote) throws Exception{
         String ipDestinoBinario = converteIpParaBinario( pacote.getIpDestino().getHostAddress() );
         String redeDestino;
         String redeTabela;
@@ -136,7 +153,11 @@ public class Roteador {
             } 
         }
         if (maiorMascara[1] == -1){ // entao tem que ir pela rota default
-            return tabelaRoteamento.length - 1;            
+            int indiceDaRotaDefault = buscaRotaDefault(tabelaRoteamento);
+            if(indiceDaRotaDefault >= 0)
+                return indiceDaRotaDefault;
+            else
+                throw new Exception ("Nenhuma rota encontrada, pacote descartado");
         }
         return maiorMascara[0];
     }
@@ -164,5 +185,19 @@ public class Roteador {
         return novaIp;
     }// testada e funcionando
     
-    
+    public static boolean avaliaEnderecoDestino(PacoteIP pacoteIP) throws UnknownHostException{
+        InetAddress enderecoDestino = pacoteIP.getIpDestino();
+        System.out.println(enderecoDestino.getHostAddress() + "==" + InetAddress.getLocalHost().getHostAddress());
+        return enderecoDestino.getHostAddress().equals(InetAddress.getLocalHost().getHostAddress());
+    }
+
+    private static int buscaRotaDefault(Object[][] tabelaRoteamento){
+        for(int i = 0; i < tabelaRoteamento.length; i++){
+            InetAddress end = (InetAddress) tabelaRoteamento[i][2];
+            if(end.getHostAddress().equals("0.0.0.0")){
+                return i;
+            }
+        }
+        return -1;
+    }// fim buscaRotaDefault
 }// fim class
