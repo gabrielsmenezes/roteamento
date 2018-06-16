@@ -1,3 +1,5 @@
+package Model;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +21,7 @@ import java.net.UnknownHostException;
  */
 public class Roteador {
     public static void main(String[] args) {
+        System.out.println("FUI INICIADOOOOOOO");
         try {   
             int porta = Integer.parseInt(args[0]); // roteador recebe a porta em que escutará 
             Object[][] tabelaRoteamento = criaTabelaRoteamento(args);
@@ -40,10 +43,24 @@ public class Roteador {
                         roteamentoDireto(pacoteIP);
                     }
                     else {
-                        System.out.println("Encaminhamento");
+                        
                         int indiceProx = descobreProximoRoteador(tabelaRoteamento, pacoteIP);
+                        if(indiceProx == -1){
+                            continue;
+                        }
+                        InetAddress end = (InetAddress) tabelaRoteamento[indiceProx][2];
+                        if(end.getHostAddress().equals("0.0.0.0")){
+                            System.out.println("Roteamento direto");
+                            roteamentoDireto(pacoteIP);
+                            continue;
+                        }else if(end.getHostAddress().equals("1.1.1.1")){
+                            System.out.println("O roteador é o proprio destino");
+                            roteamentoDireto(pacoteIP);
+                            continue;
+                        }
                         InetAddress proxSalto = (InetAddress) tabelaRoteamento[indiceProx][2];
                         String interfaceDeSaida = (String) tabelaRoteamento[indiceProx][3];
+                        System.out.println("Encaminhamento");
                         encaminha(proxSalto, interfaceDeSaida, pacoteIP);
                     }
                     
@@ -51,6 +68,7 @@ public class Roteador {
                     
                 }// fim ife
                 else {
+                    System.out.println("TLL excedido!!");
                     continue;
                 }
             }
@@ -152,15 +170,19 @@ public class Roteador {
                 maiorMascara[1] = extraiRede((String) tabelaRoteamento[i][1], (String) tabelaRoteamento[i][1]).length();
             } 
         }
-        if (maiorMascara[1] == -1){ // entao tem que ir pela rota default
+        if (maiorMascara[1] == -1){
             int indiceDaRotaDefault = buscaRotaDefault(tabelaRoteamento);
             if(indiceDaRotaDefault >= 0)
                 return indiceDaRotaDefault;
-            else
-                throw new Exception ("Nenhuma rota encontrada, pacote descartado");
+            else{
+                System.out.println("Nenhuma rota encontrada, pacote descartado");
+                return -1;
+            }
+        
         }
         return maiorMascara[0];
     }
+
     public static String extraiRede(String ip, String mascara){ /// testada e funcionando
         String saida = "";
         for(int i = 0; mascara.charAt(i) != '0' && i < 32 ;i++){
@@ -168,9 +190,7 @@ public class Roteador {
         }
         return saida;
     }
-    
-    
-    
+     
     public static String converteIpParaBinario(String iP) {// testada e funcionando
         String[] ip = iP.split("\\.");
         String novaIp = "";
@@ -193,7 +213,7 @@ public class Roteador {
 
     private static int buscaRotaDefault(Object[][] tabelaRoteamento){
         for(int i = 0; i < tabelaRoteamento.length; i++){
-            InetAddress end = (InetAddress) tabelaRoteamento[i][2];
+            InetAddress end = (InetAddress) tabelaRoteamento[i][0];
             if(end.getHostAddress().equals("0.0.0.0")){
                 return i;
             }
