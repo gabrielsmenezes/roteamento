@@ -1,5 +1,5 @@
 
-import Model.Roteador;
+import model.Roteador;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
