@@ -19,13 +19,18 @@ import java.net.UnknownHostException;
  *
  * @author mrgab
  */
-public class Roteador {
-    public static void main(String[] args) {
-        System.out.println("FUI INICIADOOOOOOO");
+public class Roteador extends Thread{
+    static String[] args;
+    public Roteador(String[] argumentos) {
+        args = argumentos;
+    }
+    
+    
+    public void run() {
         try {   
             int porta = Integer.parseInt(args[0]); // roteador recebe a porta em que escutará 
             Object[][] tabelaRoteamento = criaTabelaRoteamento(args);
-            System.out.println("Tabela criada");
+//            System.out.println("Tabela criada");
             byte[] buffer = new byte[2048];
             DatagramPacket pacote = new DatagramPacket(buffer, buffer.length);
             DatagramSocket socket = new DatagramSocket(porta);

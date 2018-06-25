@@ -16,9 +16,12 @@ import java.net.InetAddress;
  *
  * @author mrgab
  */
-public class Emissor {
-
-    public static void main(String[] args) {
+public class Emissor extends Thread{
+    String[] args;
+    public Emissor (String[] argumentos){
+         args = argumentos;
+    }
+    public void run() {
         try {
             InetAddress ipDefault = InetAddress.getByName(args[0]);
             int portaDefault = Integer.parseInt(args[1]);
@@ -26,9 +29,9 @@ public class Emissor {
             InetAddress ipDestino = InetAddress.getByName(args[3]);
             String dados = args[4];
             PacoteIP pacote = criaPacote(ipDestino, ipOrigem, dados);
-            System.out.println("Pacote criado");
+//            System.out.println("Pacote criado");
             enviaPacote(pacote, ipDefault, portaDefault);
-            System.out.println("Pacote enviador");
+//            System.out.println("Pacote enviador");
         } catch (Exception e) {
             e.printStackTrace();
         }
